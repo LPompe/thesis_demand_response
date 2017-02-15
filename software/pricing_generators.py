@@ -15,15 +15,15 @@ class StaticSinePricingGenerator(BasePricingGenerator):
 
     def generate_episode_pricing(self):
         linspace = np.linspace(0, self.length, self.length)
-        f = self.length / 100 *  16
-        sine = np.cos(linspace / f) / 2 + 0.5
+        f = 0.130900 * 2
+        sine = np.cos(linspace * f) / 2 + 0.5
         return sine
 
 class ShiftSinePricingGenerator(BasePricingGenerator):
 
     def generate_episode_pricing(self):
         linspace = np.linspace(0, self.length, self.length)
-        f = self.length / 100 *  16
+        f = 0.130900 * 2
         shift = randint(0, self.length)
-        sine = np.cos(linspace / f + shift) / 2 + 0.5
+        sine = np.cos(linspace * f + shift) / 2 + 0.5
         return sine
