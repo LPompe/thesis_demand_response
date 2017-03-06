@@ -3,6 +3,9 @@ import abc
 import random
 from math import floor, log
 import itertools
+from sklearn.ensemble import RandomForestRegressor
+import numpy as np
+import warnings
 
 
 class BasePolicy():
@@ -127,3 +130,84 @@ class QLearningPolicy(BasePolicy):
             reward + self.gamma * self.compute_value_from_q(next_tile) - self.get_q_value(tile, action)
             )
         )
+
+class QLearningRfPolicy(BasePolicy):
+
+    def __init__(self, alpha, gamma, epsilon, length):
+        self.length = length
+        self.alpha = alpha
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.dataset = []
+        self.legal_actions = None
+        self.t = 0
+        self.model = None
+
+    def set_legal_actions(self, cells):
+        """
+        CAUTION!, factorial memory complexity
+        """
+        all_actions = [[0,1] for _ in cells]
+        self.legal_actions = list(itertools.product(*all_actions))
+
+    def policy(self, s, cells):
+        if not self.legal_actions:
+            self.set_legal_actions(cells)
+
+        if random.random() <= self.epsilon or self.model == None:
+            self.epsilon -= 1e-4
+            return list(random.choice(self.legal_actions))
+
+        return list(self.compute_action_from_q(s))
+
+    def get_q_value(self, state, action):
+        state = state.copy()
+        s = state
+        state = list(state.values())
+        for a in action:
+            state.append(a)
+        state = np.array(state).reshape(1, -1)
+        prediction = self.model.predict(state)
+        #print(s, action,  prediction)
+        return prediction
+
+    def compute_value_from_q(self, state):
+        actions = self.legal_actions
+        max_val = -float('Inf')
+        for action in actions:
+            qval = self.get_q_value(state, action)
+
+            if qval > max_val:
+                max_q_val = qval
+
+        return max_q_val
+
+    def compute_action_from_q(self, state):
+        actions = self.legal_actions
+        max_q_val = -float('Inf')
+        best_action = None
+        for action in actions:
+            qval = self.get_q_value(state, action)
+
+            if qval > max_q_val:
+                max_q_val = qval
+                best_action = action
+
+        return best_action
+
+    def update(self, s, cells, action, ns, ncells, reward):
+        if not self.legal_actions:
+            self.set_legal_actions(cells)
+
+        s = list(s.values())
+        for a in action:
+            s.append(a)
+        #print(s, action, reward)
+        self.dataset.append((s, reward))
+
+        self.t += 1
+        if self.t % (self.length * 20) == 0 and self.length > 1:
+            states, rewards = zip(*self.dataset)
+            states = np.array(states)
+            self.model = RandomForestRegressor()
+            self.model.fit(states, rewards)
