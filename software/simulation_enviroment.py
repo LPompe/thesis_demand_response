@@ -71,7 +71,6 @@ class DemandResponseEviroment():
     def start_episode(self, visualise = False):
 
         if self.episode_in_progress and not self.timestep >= self.episode_length:
-            print("WARNING: episode in progress, resetting anyway")
             self.reset()
 
         self.reset()
@@ -116,7 +115,6 @@ class DemandResponseEviroment():
     def execute_action(self, a):
 
         if not self.episode_in_progress or self.timestep >= self.episode_length - 1:
-            print("Episode has ended")
             return
 
         self.episode_in_progress = True
@@ -222,7 +220,7 @@ class Cell():
     def execute_action(self, a, noise_function = identity):
         self.state = a
         if a == Cell.on:
-            self.temperature -= noise_function(((self.temperature + 0.1) * math.log(10, math.exp(1)))/ 100) 
+            self.temperature -= noise_function(((self.temperature + 0.1) * math.log(10, math.exp(1)))/ 100)
             self.time_off = 0
             self.time_on += 1
 
