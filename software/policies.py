@@ -155,7 +155,7 @@ class QLearningRfPolicy(BasePolicy):
             self.set_legal_actions(cells)
 
         if random.random() <= self.epsilon or self.model == None:
-            self.epsilon -= 1e-4
+            self.epsilon -= 1e-5
             return list(random.choice(self.legal_actions))
 
         return list(self.compute_action_from_q(s))
@@ -206,8 +206,10 @@ class QLearningRfPolicy(BasePolicy):
         self.dataset.append((s, reward))
 
         self.t += 1
-        if self.t % (self.length * 20) == 0 and self.length > 1:
+
+        if self.t % (self.length * 10) == 0 and self.length > 1:
             states, rewards = zip(*self.dataset)
             states = np.array(states)
             self.model = RandomForestRegressor()
             self.model.fit(states, rewards)
+            self.dataset = self.dataset[100:]

@@ -62,7 +62,6 @@ def play(p, t, update = True):
     env.execute_action(action)
     ns , ncells = env.get_global_state(), env.cells
     reward = reward_function(ns, ncells) + gamma  * play(p, t + 1, update)
-    print(reward)
     if t < length:
         if update:
             p.update(s, cells, action, ns, ncells, reward)
@@ -72,15 +71,16 @@ def play(p, t, update = True):
 
 # In[11]:
 
-iters = 100
+iters = 150
 avg_rewards = []
 for i in range(iters):
-    if not not i % 10:
-        print('Starting iter..', i)
     env.start_episode(visualise=False)
-    play(p, 0)
-    avg_rewards.append(sum(rewards)/len(rewards))
+    r = play(p, 0)
+    avg = sum(rewards)/len(rewards)
+    avg_rewards.append(avg)
     rewards = []
+    if not i % 10:
+        print('Starting iter..', i, avg)
 
 
 # In[ ]:
