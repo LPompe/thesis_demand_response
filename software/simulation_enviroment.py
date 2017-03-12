@@ -99,6 +99,8 @@ class DemandResponseEviroment():
         global_state_dict = {}
         power_usage = 0
         pricing = self.episode_pricing[self.timestep]
+
+
         for cell in self.cells:
 
             cell_dict = cell.get_state_dict()
@@ -109,7 +111,10 @@ class DemandResponseEviroment():
 
         global_state_dict['power_usage'] = power_usage
         global_state_dict['pricing'] = pricing
-
+        if self.timestep < self.episode_length - 60:
+            global_state_dict['price_diff'] = pricing - self.episode_pricing[self.timestep + 60]
+        else:
+            global_state_dict['price_diff'] = 0
         return global_state_dict
 
     def execute_action(self, a):
@@ -127,8 +132,9 @@ class DemandResponseEviroment():
 
         self.timestep += 1
 
+
+        self.episode_history[self.timestep] = self.get_global_state()
         if self.visualise:
-            self.episode_history[self.timestep] = self.get_global_state()
             if self.timestep >= self.episode_length - 1:
                 self.visualise_history()
 
@@ -165,6 +171,7 @@ class DemandResponseEviroment():
         axes[-1].plot(realised_price, label = 'realised_price')
         axes[-1].legend()
 
+        print('realised_price:', realised_price.sum())
         f.set_size_inches(16, 9)
         plt.show()
 

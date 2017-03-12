@@ -16,4 +16,4 @@ def switch_cost(s, cells):
 
 def energy_price_cost(s, cells):
     realised = s['power_usage'] * s['pricing']
-    return (1 - realised)/100
+    return  -realised/100

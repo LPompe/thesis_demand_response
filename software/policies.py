@@ -131,7 +131,7 @@ class QLearningPolicy(BasePolicy):
             )
         )
 
-class QLearningRfPolicy(BasePolicy):
+class QLearningGBPolicy(BasePolicy):
 
     def __init__(self, alpha, gamma, epsilon, length):
         self.length = length
@@ -154,8 +154,8 @@ class QLearningRfPolicy(BasePolicy):
         if not self.legal_actions:
             self.set_legal_actions(cells)
 
+        self.epsilon -= 1e-5
         if random.random() <= self.epsilon or self.model == None:
-            self.epsilon -= 1e-5
             return list(random.choice(self.legal_actions))
 
         return list(self.compute_action_from_q(s))
