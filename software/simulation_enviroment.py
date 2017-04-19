@@ -227,11 +227,11 @@ class Cell():
     def execute_action(self, a, noise_function = identity):
         self.state = a
         if a == Cell.on:
-            self.temperature -= noise_function(((self.temperature + 0.1) * math.log(10, math.exp(1)))/ 100)
+            self.temperature -= noise_function(((self.temperature + 0.1) * math.log(1.022, math.exp(1))))
             self.time_off = 0
             self.time_on += 1
 
         elif a == Cell.off:
-            self.temperature += noise_function((1 / (self.temperature + 0.1) * math.log(1.2, math.exp(1)))/ 100)
+            self.temperature += noise_function((1 / (self.temperature + 0.1) * math.log(1.00185, math.exp(1))))
             self.time_on = 0
             self.time_off += 1

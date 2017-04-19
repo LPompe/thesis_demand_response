@@ -3,7 +3,7 @@ import abc
 import random
 from math import floor, log
 import itertools
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 import numpy as np
 import warnings
 
@@ -133,7 +133,7 @@ class QLearningPolicy(BasePolicy):
 
 class QLearningGBPolicy(BasePolicy):
 
-    def __init__(self, alpha, gamma, epsilon, length):
+    def __init__(self, alpha, gamma, epsilon, length, max_depth = None, max_leaf_nodes = None):
         self.length = length
         self.alpha = alpha
         self.gamma = gamma
@@ -142,6 +142,8 @@ class QLearningGBPolicy(BasePolicy):
         self.legal_actions = None
         self.t = 0
         self.model = None
+        self.max_depth = max_depth
+        self.max_leaf_nodes = max_leaf_nodes
 
     def set_legal_actions(self, cells):
         """
@@ -154,7 +156,7 @@ class QLearningGBPolicy(BasePolicy):
         if not self.legal_actions:
             self.set_legal_actions(cells)
 
-        self.epsilon -= 1e-5
+        self.epsilon -= 9e-6
         if random.random() <= self.epsilon or self.model == None:
             return list(random.choice(self.legal_actions))
 
@@ -210,6 +212,9 @@ class QLearningGBPolicy(BasePolicy):
         if self.t % (self.length * 10) == 0 and self.length > 1:
             states, rewards = zip(*self.dataset)
             states = np.array(states)
-            self.model = RandomForestRegressor()
+            if not self.model:
+                self.model = GradientBoostingRegressor(warm_start=True, n_estimators=0, max_depth=self.max_depth, max_leaf_nodes=self.max_leaf_nodes)
+            self.model.n_estimators += 10
+            #self.model = GradientBoostingRegressor()
             self.model.fit(states, rewards)
             self.dataset = self.dataset[100:]
